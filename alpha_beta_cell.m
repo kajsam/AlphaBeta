@@ -37,18 +37,22 @@ alpha_c = zeros(1,n);
 beta_c = zeros(1,n);
 pi0_c = zeros(1,n);
 pi1_c = zeros(1,n);
+
+t = zeros(2,n);
 for i = 1 : n
   n00 = max(sum(~X(i,:) & ~ A(i,:)),1); % Let it be minimum 1 to avoid 1/0
   n01 = max(sum(~X(i,:) & A(i,:)),1); % Let it be minimum 1 to avoid 1/0
   n10 = max(sum(X(i,:) & ~A(i,:)),1); % Let it be minimum 1 to avoid log 0
   n11 = max(sum(X(i,:) & A(i,:)),1);  % Let it be minimum 1 to avoid log 0
-  alpha_c(i) = log(n10/n00);
-  beta_c(i) = log(n11/n01) - log(n10/n00);
+  alpha_c(i) = log(n10/(n00+eps) + eps);
+  beta_c(i) = log(n11/(n01+eps) + eps) - log(n10/(n00+eps) + eps);
   pi0_c(i) = exp(alpha_c(i))/(1 + exp(alpha_c(i))); 
   pi1_c(i) = exp(alpha_c(i) + beta_c(i))/(1 + exp(alpha_c(i)+ beta_c(i))); 
+  t(1,i) = log((n00+n10)/(n00+eps) + eps);
+  t(2,i) = log((n01+n11)/(n01+eps) + eps);
 end
 
-alphabeta_c = [alpha_c; beta_c; pi0_c; pi1_c];
+alphabeta_c = [alpha_c; beta_c; t];
 
 % The (n x d) probability matrix can be calculated
 % pi0 if A_ij = 0, pi1 if A_ij = 1
@@ -61,9 +65,10 @@ end
 
 % Maybe I should check for 0's and 1's. Don't know what to do about them,
 % though.
-
-find(Pi == 0)
-find(Pi == 1)
+if any(find(Pi == 0)) || any(find(Pi == 1))
+  disp('/pi = 0 or 1')
+  return
+end
 
 % The overall effect, common for each entry in X
 effect = 1 - sum(sum(xor(X,A)))/(n*d); 
@@ -83,8 +88,9 @@ for i = 1: n
 end
 
 if fig_nr
-  figure(fig_nr), imagesc(repmat(cell_effect,1,10)), colormap(gray)
+  figure(fig_nr), imagesc(repmat(cell_effect,1,10)), colormap(gray), title('Cell effect')
 end
+
 
 
 
