@@ -46,13 +46,13 @@ for i = 1 : n
   n11 = max(sum(X(i,:) & A(i,:)),1);  % Let it be minimum 1 to avoid log 0
   alpha_c(i) = log(n10/(n00+eps) + eps);
   beta_c(i) = log(n11/(n01+eps) + eps) - log(n10/(n00+eps) + eps);
-  pi0_c(i) = exp(alpha_c(i))/(1 + exp(alpha_c(i))); 
-  pi1_c(i) = exp(alpha_c(i) + beta_c(i))/(1 + exp(alpha_c(i)+ beta_c(i))); 
+  pi0_c(i) = n10/(n00+n10);% exp(alpha_c(i))/(1 + exp(alpha_c(i))); 
+  pi1_c(i) = n11/(n01+n11);% exp(alpha_c(i) + beta_c(i))/(1 + exp(alpha_c(i)+ beta_c(i))); 
   t(1,i) = log((n00+n10)/(n00+eps) + eps);
   t(2,i) = log((n01+n11)/(n01+eps) + eps);
 end
 
-alphabeta_c = [alpha_c; beta_c; t];
+alphabeta_c = [alpha_c; beta_c; t; pi1_c];
 
 % The (n x d) probability matrix can be calculated
 % pi0 if A_ij = 0, pi1 if A_ij = 1
